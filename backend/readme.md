@@ -170,3 +170,54 @@ Example:
     ]
 }
 ```
+
+# Authentication Middleware
+
+## Description
+The `auth.middleware.js` file contains middleware to authenticate users using JWT tokens. It checks for the presence of a token in the cookies or the `Authorization` header and verifies it.
+
+## How It Works
+1. The middleware extracts the token from either the cookies or the `Authorization` header.
+2. If no token is found, it responds with a `401 Unauthorized` status.
+3. If a token is found, it verifies the token using the secret key from the environment variables.
+4. If the token is valid, it retrieves the user associated with the token and attaches the user object to the `req` object.
+5. If the token is invalid, it responds with a `401 Unauthorized` status.
+
+## Code Example
+```javascript
+const userModel = require('../models/user.model');
+const jwt = require('jsonwebtoken');
+
+module.exports.authUser = async(req, res, next) => {
+    const token = req.cookies.token || req.headers.authorization.split(' ')[1];
+    if (!token) {
+        return res.status(401).json({ message: 'unauthorized' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await userModel.findById(decoded._id);
+
+        req.user = user;
+        return next();
+    } catch (err) {
+        return res.status(401).json({ message: 'unauthorized' });
+    }
+}
+```
+
+## How Cookies Work
+Cookies are small pieces of data stored on the client-side and sent to the server with each request. They are used to maintain session information between the client and the server.
+
+## How Tokens Work for Headers and Cookies
+- **Headers**: Tokens can be sent in the `Authorization` header as a Bearer token. This is a common practice for APIs.
+- **Cookies**: Tokens can also be stored in cookies and sent with each request. This is useful for web applications where cookies are automatically managed by the browser.
+
+## Why We Use `cookie-parser` Package
+The `cookie-parser` package is used to parse cookies attached to the client request object. It makes it easy to access and manipulate cookies in the request.
+
+Example usage in `app.js`:
+```javascript
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
+```
