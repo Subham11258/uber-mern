@@ -95,3 +95,78 @@ Example of a successful response:
     }
 }
 ```
+
+# User Login Endpoint
+
+## Endpoint
+`POST /users/login`
+
+## Description
+This endpoint is used to log in an existing user. It requires the user's email and password.
+
+## Request Body
+The request body should be a JSON object with the following fields:
+- `email` (string, required): The email address of the user. Must be a valid email format.
+- `password` (string, required): The password for the user account. Must be at least 6 characters long.
+
+Example:
+```json
+{
+    "email": "john.doe@example.com",
+    "password": "password123"
+}
+```
+
+## Responses
+
+### Success
+- **Status Code**: `200 OK`
+- **Response Body**: The user object (excluding the password) and a JWT token.
+
+Example:
+```json
+{
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "user": {
+        "_id": "60c72b2f9b1e8b001c8e4e3b",
+        "fullname": {
+            "firstname": "John",
+            "lastname": "Doe"
+        },
+        "email": "john.doe@example.com",
+        "socketId": null
+    }
+}
+```
+
+### Error
+- **Status Code**: `400 Bad Request`
+- **Response Body**: An error message indicating what went wrong.
+
+Example:
+```json
+{
+    "error": "Invalid email or password"
+}
+```
+
+- **Status Code**: `422 Unprocessable Entity`
+- **Response Body**: Validation errors for the provided data.
+
+Example:
+```json
+{
+    "errors": [
+        {
+            "msg": "Invalid Email",
+            "param": "email",
+            "location": "body"
+        },
+        {
+            "msg": "Password must be 6 characters long",
+            "param": "password",
+            "location": "body"
+        }
+    ]
+}
+```
