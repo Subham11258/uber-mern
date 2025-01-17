@@ -171,26 +171,114 @@ Example:
 }
 ```
 
-# Authentication Middleware
+# User Profile Endpoint
+
+## Endpoint
+`GET /users/profile`
 
 ## Description
-The `auth.middleware.js` file contains middleware to authenticate users using JWT tokens. It checks for the presence of a token in the cookies or the `Authorization` header and verifies it.
+This endpoint is used to retrieve the profile of the authenticated user.
 
-## How It Works
-1. The middleware extracts the token from either the cookies or the `Authorization` header.
-2. If no token is found, it responds with a `401 Unauthorized` status.
-3. If a token is found, it verifies the token using the secret key from the environment variables.
-4. If the token is valid, it retrieves the user associated with the token and attaches the user object to the `req` object.
-5. If the token is invalid, it responds with a `401 Unauthorized` status.
+## Authentication
+This endpoint requires the user to be authenticated. The JWT token should be provided in the cookies or the `Authorization` header.
 
-## Code Example
+## Responses
+
+### Success
+- **Status Code**: `200 OK`
+- **Response Body**: The user object (excluding the password).
+
+Example:
+```json
+{
+    "_id": "60c72b2f9b1e8b001c8e4e3b",
+    "fullname": {
+        "firstname": "John",
+        "lastname": "Doe"
+    },
+    "email": "john.doe@example.com",
+    "socketId": null
+}
+```
+
+### Error
+- **Status Code**: `401 Unauthorized`
+- **Response Body**: An error message indicating that the user is not authenticated.
+
+Example:
+```json
+{
+    "message": "unauthorized"
+}
+```
+
+# User Logout Endpoint
+
+## Endpoint
+`GET /users/logout`
+
+## Description
+This endpoint is used to log out the authenticated user. It clears the JWT token from the cookies and blacklists the token to prevent further use.
+
+## Authentication
+This endpoint requires the user to be authenticated. The JWT token should be provided in the cookies or the `Authorization` header.
+
+## Responses
+
+### Success
+- **Status Code**: `200 OK`
+- **Response Body**: A message indicating that the user has been logged out successfully.
+
+Example:
+```json
+{
+    "message": "Logged out successfully"
+}
+```
+
+### Error
+- **Status Code**: `401 Unauthorized`
+- **Response Body**: An error message indicating that the user is not authenticated.
+
+Example:
+```json
+{
+    "message": "unauthorized"
+}
+```
+
+# Blacklist Token Model
+
+The `blacklistToken.model.js` file defines a Mongoose schema and model for storing blacklisted JWT tokens in a MongoDB collection. This is used to manage and invalidate tokens that should no longer be accepted for authentication, such as after a user logs out.
+
+### Key Points:
+1. **Schema Definition**:
+    - `token`: A string field to store the JWT token. It is required and unique.
+    - `createdAt`: A date field that defaults to the current date and time. It has an expiration time of 86400 seconds (24 hours), meaning the document will be automatically removed from the collection after this period.
+
+2. **Purpose**:
+    - **Security**: By blacklisting tokens, you can ensure that tokens which should no longer be valid (e.g., after logout) are not accepted for authentication.
+    - **Automatic Cleanup**: The `expires` option on the `createdAt` field ensures that blacklisted tokens are automatically removed after 24 hours, keeping the collection clean and efficient.
+
+### Usage in `auth.middleware.js`:
+- When a user makes an authenticated request, the middleware checks if the token is blacklisted by querying the `blacklistTokenModel`.
+- If the token is found in the blacklist, the request is rejected with a 401 Unauthorized status.
+- This prevents the use of tokens that have been explicitly invalidated, enhancing the security of the application.
+
+## Example usage in `auth.middleware.js`:
 ```javascript
 const userModel = require('../models/user.model');
 const jwt = require('jsonwebtoken');
+const blackListTokenModel = require('../models/blacklistToken.model');
 
 module.exports.authUser = async(req, res, next) => {
     const token = req.cookies.token || req.headers.authorization.split(' ')[1];
     if (!token) {
+        return res.status(401).json({ message: 'unauthorized' });
+    }
+
+    const isBlacklisted = await blackListTokenModel.findOne({ token: token });
+    if (isBlacklisted) {
         return res.status(401).json({ message: 'unauthorized' });
     }
 
@@ -204,20 +292,4 @@ module.exports.authUser = async(req, res, next) => {
         return res.status(401).json({ message: 'unauthorized' });
     }
 }
-```
-
-## How Cookies Work
-Cookies are small pieces of data stored on the client-side and sent to the server with each request. They are used to maintain session information between the client and the server.
-
-## How Tokens Work for Headers and Cookies
-- **Headers**: Tokens can be sent in the `Authorization` header as a Bearer token. This is a common practice for APIs.
-- **Cookies**: Tokens can also be stored in cookies and sent with each request. This is useful for web applications where cookies are automatically managed by the browser.
-
-## Why We Use `cookie-parser` Package
-The `cookie-parser` package is used to parse cookies attached to the client request object. It makes it easy to access and manipulate cookies in the request.
-
-Example usage in `app.js`:
-```javascript
-const cookieParser = require('cookie-parser');
-app.use(cookieParser());
 ```
