@@ -294,7 +294,6 @@ module.exports.authUser = async(req, res, next) => {
 }
 ```
 
-
 # Captain Registration Endpoint
 
 ## Endpoint
@@ -330,5 +329,197 @@ Example:
         "vehicleType": "car"
     }
 }
+```
 
+## Responses
 
+### Success
+- **Status Code**: `201 Created`
+- **Response Body**: The newly created captain object and a JWT token.
+
+Example:
+```json
+{
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "captain": {
+        "_id": "60c72b2f9b1e8b001c8e4e3b",
+        "fullname": {
+            "firstname": "Jane",
+            "lastname": "Doe"
+        },
+        "email": "jane.doe@example.com",
+        "vehicle": {
+            "color": "Red",
+            "plate": "ABC123",
+            "capacity": 4,
+            "vehicleType": "car"
+        },
+        "status": "inactive"
+    }
+}
+```
+
+### Error
+- **Status Code**: `400 Bad Request`
+- **Response Body**: An error message indicating what went wrong.
+
+Example:
+```json
+{
+    "error": "All fields are required"
+}
+```
+
+- **Status Code**: `422 Unprocessable Entity`
+- **Response Body**: Validation errors for the provided data.
+
+Example:
+```json
+{
+    "errors": [
+        {
+            "msg": "Invalid Email",
+            "param": "email",
+            "location": "body"
+        },
+        {
+            "msg": "First name must be at least 3 characters long",
+            "param": "fullname.firstname",
+            "location": "body"
+        },
+        {
+            "msg": "Password must be 5 characters long",
+            "param": "password",
+            "location": "body"
+        }
+    ]
+}
+```
+
+# Captain Login Endpoint
+
+## Endpoint
+`POST /captains/login`
+
+## Description
+This endpoint is used to log in an existing captain. It requires the captain's email and password.
+
+## Request Body
+The request body should be a JSON object with the following fields:
+- `email` (string, required): The email address of the captain. Must be a valid email format.
+- `password` (string, required): The password for the captain's account. Must be at least 5 characters long.
+
+Example:
+```json
+{
+    "email": "jane.doe@example.com",
+    "password": "password123"
+}
+```
+
+## Responses
+
+### Success
+- **Status Code**: `200 OK`
+- **Response Body**: The captain object (excluding the password) and a JWT token.
+
+Example:
+```json
+{
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "captain": {
+        "_id": "60c72b2f9b1e8b001c8e4e3b",
+        "fullname": {
+            "firstname": "Jane",
+            "lastname": "Doe"
+        },
+        "email": "jane.doe@example.com",
+        "vehicle": {
+            "color": "Red",
+            "plate": "ABC123",
+            "capacity": 4,
+            "vehicleType": "car"
+        },
+        "status": "inactive"
+    }
+}
+```
+
+### Error
+- **Status Code**: `400 Bad Request`
+- **Response Body**: An error message indicating what went wrong.
+
+Example:
+```json
+{
+    "error": "Invalid email or password"
+}
+```
+
+- **Status Code**: `422 Unprocessable Entity`
+- **Response Body**: Validation errors for the provided data.
+
+Example:
+```json
+{
+    "errors": [
+        {
+            "msg": "Invalid Email",
+            "param": "email",
+            "location": "body"
+        },
+        {
+            "msg": "Password must be 5 characters long",
+            "param": "password",
+            "location": "body"
+        }
+    ]
+}
+```
+
+# Captain Profile Endpoint
+
+## Endpoint
+`GET /captains/profile`
+
+## Description
+This endpoint is used to retrieve the profile of the authenticated captain.
+
+## Authentication
+This endpoint requires the captain to be authenticated. The JWT token should be provided in the cookies or the `Authorization` header.
+
+## Responses
+
+### Success
+- **Status Code**: `200 OK`
+- **Response Body**: The captain object (excluding the password).
+
+Example:
+```json
+{
+    "_id": "60c72b2f9b1e8b001c8e4e3b",
+    "fullname": {
+        "firstname": "Jane",
+        "lastname": "Doe"
+    },
+    "email": "jane.doe@example.com",
+    "vehicle": {
+        "color": "Red",
+        "plate": "ABC123",
+        "capacity": 4,
+        "vehicleType": "car"
+    },
+    "status": "inactive"
+}
+```
+
+### Error
+- **Status Code**: `401 Unauthorized`
+- **Response Body**: An error message indicating that the captain is not authenticated.
+
+Example:
+```json
+{
+    "message": "unauthorized"
+}
+```
