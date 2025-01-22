@@ -65,4 +65,4 @@ module.exports.logoutCaptain = async (req, res, next) => {
     return res.status(200).json({ message: 'logged out' });
 }
 
-module.exports = router;
+

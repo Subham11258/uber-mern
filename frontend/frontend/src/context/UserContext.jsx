@@ -4,11 +4,13 @@ export const UserDataContext = createContext();
 
 export default function UserContext({children}) {
     const [user, setUser] = useState({
+        
+        fullname:{
+            firstname:'',
+            lastname:''
+        },
         email: '',
-        fullName:{
-            firstName:'',
-            lastName:''
-        }
+        
     }
     );
   return (
