@@ -12,7 +12,7 @@ export default function UserSignup() {
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [userData, setUserData] = useState({});
+  
   const {user, setUser} = useContext(UserDataContext);
 
   const navigate = useNavigate();
@@ -32,12 +32,13 @@ export default function UserSignup() {
 
     if(response.status === 201){
       const data = response.data;
-      setUserData(data.user);
+      
       setUser(data.user);
+      localStorage.setItem('token', data.token);
       navigate('/home');
     }
 
-    console.log(userData);
+    
     setFirstName('');
     setLastName('');
     setEmail('');

@@ -3,9 +3,11 @@ import Start from './pages/Start'
 import Home from './pages/Home'
 import UserLogin from './pages/UserLogin'
 import UserSignup from './pages/UserSignup'
+import UserLogout from './pages/UserLogout'
 import CaptainLogin from './pages/CaptainLogin'
 import CaptainSignup from './pages/CaptainSignup'
 import { Routes, Route } from 'react-router-dom'
+import UserProtectedWrapper from './pages/UserProtectedWrapper'
 const App = () => {
   return (
     <div>
@@ -16,7 +18,8 @@ const App = () => {
         <Route path="/signup" element={<UserSignup/>} />
         <Route path="/captain-login" element={<CaptainLogin/>} />
         <Route path="/captain-signup" element={<CaptainSignup/>} />
-        <Route path="/home" element={<Home/>} />
+        <Route path="/home" element={<UserProtectedWrapper><Home/></UserProtectedWrapper>} />
+        <Route path="/user/logout" element={<UserProtectedWrapper><UserLogout/></UserProtectedWrapper>} /> 
       </Routes>
     </div>
   )
