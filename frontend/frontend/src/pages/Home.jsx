@@ -76,7 +76,7 @@ export default function Home() {
             />
           </form>
         </div>
-        <div ref={panelRef} className="bg-red-500 h-0">
+        <div ref={panelRef} className="bg-red-500 opacity-1 h-0">
 
         </div>
       </div>
